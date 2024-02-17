@@ -2,3 +2,4 @@ pyrogram
 asyncio
 TgCrypto
 requests
+bing-image-urls
