@@ -10,17 +10,12 @@ from pyrogram import filters
 @Koshik.on_message(filters.command(["ocr"]))
 async def ocr_command(bot, message):
     z = await message.reply_text("__Checking...⚡__", quote=True)
-    preimg = message.reply_to_message
+    preimg = message.reply_to_message.photo
     if preimg:
-        if preimg.file_size < 10 * 1024 * 1024:
-            img = await bot.download_media(preimg)
-            txt = pytesseract.image_to_string(Image.open(img))
-            if txt:
-                await message.reply_text(txt, quote=True)
-            else:
-                await message.reply_text("**Failed to perform OCR on the provided image.**", quote=True)
-            os.remove(img)
+        txt = pytesseract.image_to_string(Image.open(preimg))
+        if txt:
+            await message.reply_text(txt, quote=True)
         else:
-            await z.edit_text("**Send image less than 10 MB**")
+            await message.reply_text("**Failed to perform OCR on the provided image.**", quote=True)
     else:
         await z.edit_text("**Please reply to any image**")
