@@ -7,7 +7,7 @@ import pytesseract # pip install pytesseract (requirements.txt)
 from pyrogram import Client as Koshik
 from pyrogram import filters
 
- def start_ocr(input_file):
+def start_ocr(input_file):
     text = ""
     if input_file.file_size < 10 * 1024 * 1024:  # Check if file size is less than 10MB
         if input_file.mime_type.startswith('image'):
@@ -16,9 +16,8 @@ from pyrogram import filters
                 ocr.seek(0)
                 image = Image.open(ocr)
                 text = pytesseract.image_to_string(image)
-            # Delete the downloaded image
-            os.remove(ocr)
-    return text
+                os.remove(ocr)
+                return text
 
 # Command handler
 @Koshik.on_message(filters.command(["ocr"]))
