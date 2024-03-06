@@ -1,36 +1,26 @@
 # (c) Koshik Kumar (@KoshikKumar17)
 
 import os
-import io
 from PIL import Image
 import pytesseract # pip install pytesseract (requirements.txt)
 from pyrogram import Client as Koshik
 from pyrogram import filters
 
-def start_ocr(input_file):
-    text = ""
-    if input_file.file_size < 10 * 1024 * 1024:  # Check if file size is less than 10MB
-        if input_file.mime_type.startswith('image'):
-            with io.BytesIO() as ocr:
-                input_file.download(ocr)
-                ocr.seek(0)
-                image = Image.open(ocr)
-                text = pytesseract.image_to_string(image)
-                os.remove(ocr)
-                return text
 
-# Command handler
 @Koshik.on_message(filters.command(["ocr"]))
-def ocr_command(bot, message):
-    z = messages.reply_text("__Checking...⚡__", quote=True)
-    if message.reply_to_message and message.reply_to_message.photo:
-        z.edit_text("**Fetching... OCR**", quote=True)
-        replied_photo = message.reply_to_message.photo[-1]  # Get the highest resolution photo
-        text = start_ocr(replied_photo)
-        z.delete()
-        if text:
-            message.reply_text(text, quote=True)
+async def ocr_command(bot, message):
+    z = await message.reply_text("__Checking...⚡__", quote=True)
+    preimg = message.reply_to_message
+    if preimg:
+        if preimg.file_size < 10 * 1024 * 1024:
+            img = await bot.download_media(preimg)
+            txt = pytesseract.image_to_string(Image.open(img))
+            if txt:
+                await message.reply_text(txt, quote=True)
+            else:
+                await message.reply_text("**Failed to perform OCR on the provided image.**", quote=True)
+            os.remove(img)
         else:
-            message.reply_text("**Failed to perform OCR on the provided image.**", quote=True)
+            await z.edit_text("**Send image less than 10 MB**")
     else:
-        z.edit_text("**Please reply to any image**", quote=True)
+        await z.edit_text("**Please reply to any image**")
